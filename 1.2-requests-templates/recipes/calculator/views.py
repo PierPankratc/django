@@ -28,3 +28,14 @@ DATA = {
 #     'ингредиент2': количество2,
 #   }
 # }
+def dish(request, dish_name):
+    service = int(request.GET.get('service', 1))
+    dish = DATA.get(dish_name, {})
+    plural_dish = {ingredient: amount * service for ingredient, amount in dish.items()}
+    context = {'recipe': plural_dish}
+ 
+    return render(request, 'calculator/index.html', context)
+
+
+
+

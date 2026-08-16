@@ -13,5 +13,22 @@ class Command(BaseCommand):
             phones = list(csv.DictReader(file, delimiter=';'))
 
         for phone in phones:
-            # TODO: Добавьте сохранение модели
-            pass
+            try:
+                obj = Phone(
+                id=phone.get('id'),
+                name = phone.get('name'),
+                slug = phone.get('slug'),
+                image = phone.get('image'),
+                price = float(phone.get('price')),
+                release_date = phone.get('release_date'),
+                lte_exists = bool(phone.get('lte_exists'))
+            )
+                obj.save()
+            except:
+                continue
+    
+
+        
+
+        
+

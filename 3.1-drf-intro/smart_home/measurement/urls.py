@@ -1,5 +1,9 @@
 from django.urls import path
+from .views import CreateSensor, UpdateSensor, get
+
 
 urlpatterns = [
-    # TODO: зарегистрируйте необходимые маршруты
+    '/new/', CreateSensor.as_view(),
+    '/set/', UpdateSensor.as_view(),
+    '/all/', get
 ]

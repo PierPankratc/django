@@ -41,5 +41,27 @@ class AdvertisementSerializer(serializers.ModelSerializer):
         """Метод для валидации. Вызывается при создании и обновлении."""
 
         # TODO: добавьте требуемую валидацию
-
+        request = self.context.get('request')
+    
+        if self.instance is not None:
+            if self.instance.creator != request.user:
+                raise serializers.ValidationError(
+                    "Вы не можете редактировать чужое объявление."
+                )
+            
+          
+            new_status = data.get('status')
+            if new_status and new_status != self.instance.status:
+                allowed_transitions = {
+                    'draft': ['open', 'closed'],
+                    'open': ['closed'],
+                    'closed': [],
+                }
+                if new_status not in allowed_transitions.get(self.instance.status, []):
+                    raise serializers.ValidationError(
+                        f"Нельзя изменить статус с '{self.instance.status}' на '{new_status}'."
+                    )
+        
         return data
+
+        

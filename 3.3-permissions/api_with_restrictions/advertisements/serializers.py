@@ -38,18 +38,11 @@ class AdvertisementSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def validate(self, data):
-        """Метод для валидации. Вызывается при создании и обновлении."""
-
-        # TODO: добавьте требуемую валидацию
+        
         request = self.context.get('request')
-    
+        user = request.user
+
         if self.instance is not None:
-            if self.instance.creator != request.user:
-                raise serializers.ValidationError(
-                    "Вы не можете редактировать чужое объявление."
-                )
-            
-          
             new_status = data.get('status')
             if new_status and new_status != self.instance.status:
                 allowed_transitions = {
@@ -61,7 +54,29 @@ class AdvertisementSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         f"Нельзя изменить статус с '{self.instance.status}' на '{new_status}'."
                     )
+
+        new_status = data.get('status')
         
+        if self.instance is None:
+            will_be_open = new_status == 'open'
+        else:
+            will_be_open = (new_status or self.instance.status) == 'open'
+
+        if will_be_open:
+            open_count = Advertisement.objects.filter(
+                creator=user,
+                status='open'
+            ).count()
+
+            if self.instance is not None and self.instance.status == 'open':
+                open_count -= 1
+
+            if open_count >= 10:
+                raise serializers.ValidationError(
+                    f"У вас уже 10 открытых объявлений. "
+                    f"Закройте одно из них, чтобы открыть новое."
+                )
+
         return data
 
         
